@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import login, logout, authenticate
 from .forms import createtaskform
 from .models import Task
+from django.utils import timezone
 # Create your views here.
 
 
@@ -93,7 +94,7 @@ def create_task(request):
 def task_detail(request, task_id):
 
     if request.method == 'GET':
-        task_selected = get_object_or_404(Task, pk=task_id,user=request.user)
+        task_selected = get_object_or_404(Task, pk=task_id, user=request.user)
         detailform = createtaskform(instance=task_selected)
         return render(request, 'task_detail.html', {
             'task': task_selected,
@@ -101,7 +102,8 @@ def task_detail(request, task_id):
         })
     else:
         try:
-            task_selected = get_object_or_404(Task, pk=task_id,user=request.user)
+            task_selected = get_object_or_404(
+                Task, pk=task_id, user=request.user)
             form = createtaskform(request.POST, instance=task_selected)
             form.save()
             return redirect(tasks)
@@ -113,3 +115,17 @@ def task_detail(request, task_id):
                 'form': detailform,
                 'error': "error updating task"
             })
+
+
+def complete_task(request,task_id):
+    task_selected = get_object_or_404(Task, pk=task_id, user=request.user)
+    if request.method == 'POST':
+        task_selected.completiondate= timezone.now()
+        task_selected.save()
+        return redirect (tasks)
+
+def delete_task(request,task_id):
+    task_selected = get_object_or_404(Task, pk=task_id, user=request.user)
+    if request.method == 'POST':
+        task_selected.delete()
+        return redirect (tasks)
