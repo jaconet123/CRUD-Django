@@ -1,0 +1,97 @@
+from django.shortcuts import render, redirect,get_object_or_404
+from django.db import IntegrityError
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.models import User
+from django.contrib.auth import login, logout, authenticate
+from .forms import createtaskform
+from .models import Task
+# Create your views here.
+
+
+def home(request):
+    return render(request, 'home.html')
+
+
+def signup(request):
+    if request.method == 'GET':
+        return render(request, 'signup.html', {
+            'form': UserCreationForm
+        })
+    else:
+        if request.POST['password1'] == request.POST['password2']:
+            # register user
+            try:
+                createduser = User.objects.create_user(
+                    username=request.POST['username'], password=request.POST['password1'])
+                createduser.save()
+                login(request, createduser)
+                return redirect('tasks')
+            except IntegrityError:
+                return render(request, 'signup.html', {
+                    'form': UserCreationForm,
+                    'error': 'User already exist'
+                })
+        return render(request, 'signup.html', {
+            'form': UserCreationForm,
+            'error': 'Passwords do not match'
+        })
+
+
+def logoutx(request):
+    logout(request)
+    return redirect('home')
+
+
+def tasks(request):
+    task_list = Task.objects.filter(
+        user=request.user, completiondate__isnull=True)
+    return render(request, 'tasks.html', {
+        'tasklist': task_list
+    })
+
+
+def loginx(request):
+    if request.method == 'GET':
+        return render(request, 'loginx.html', {
+            'form': AuthenticationForm
+        })
+    else:
+        user = authenticate(
+            request, username=request.POST['username'], password=request.POST['password'])
+        if user is None:
+            return render(request, 'loginx.html', {
+                'form': AuthenticationForm,
+                'error': 'wrong credentials'
+            })
+        else:
+            login(request, user)
+            return redirect('tasks')
+
+
+def create_task(request):
+
+    if request.method == 'GET':
+        return render(request, 'create_task.html', {
+            'form': createtaskform
+
+        })
+    else:
+        try:
+            form = createtaskform(request.POST)
+            new_task = form.save(commit=False)
+            new_task.user = request.user
+            new_task.save()
+            return redirect('tasks')
+        except ValueError:
+            return render(request, 'create_task.html', {
+                'from': createtaskform,
+                'error': 'Missing data/not valid data'
+
+            })
+
+
+def task_detail(request, task_id):
+    task_selected = get_object_or_404(Task,pk=task_id)
+    return render(request, 'task_detail.html', {
+        'task': task_selected
+    })

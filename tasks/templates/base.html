@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=
+    , initial-scale=1.0">
+    <title>Django CRUD application</title>
+</head>
+
+<body>
+    <nav>
+        <ul>
+            <li>
+                <a href="{% url 'home' %}">Home</a>
+            </li>
+            <li>
+                <a href="{% url 'tasks' %}">tasks</a>
+            </li>
+          
+           
+            {% if user.is_authenticated %}
+            <li>
+                <a href="{% url 'logoutx' %}">Logout</a>
+            </li>
+            {% else %}
+              <li>
+                <a href="{% url 'signup' %}">signup</a>
+            </li>
+             <li>
+                <a href="{% url 'loginx' %}">Login</a>
+            </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+    {% block content %}
+    {% endblock %}
+
+</body>
+
+</html>
