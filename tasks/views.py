@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect,get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import IntegrityError
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
@@ -91,7 +91,25 @@ def create_task(request):
 
 
 def task_detail(request, task_id):
-    task_selected = get_object_or_404(Task,pk=task_id)
-    return render(request, 'task_detail.html', {
-        'task': task_selected
-    })
+
+    if request.method == 'GET':
+        task_selected = get_object_or_404(Task, pk=task_id,user=request.user)
+        detailform = createtaskform(instance=task_selected)
+        return render(request, 'task_detail.html', {
+            'task': task_selected,
+            'form': detailform
+        })
+    else:
+        try:
+            task_selected = get_object_or_404(Task, pk=task_id,user=request.user)
+            form = createtaskform(request.POST, instance=task_selected)
+            form.save()
+            return redirect(tasks)
+        except ValueError:
+            task_selected = get_object_or_404(Task, pk=task_id)
+            detailform = createtaskform(instance=task_selected)
+            return render(request, 'task_detail.html', {
+                'task': task_selected,
+                'form': detailform,
+                'error': "error updating task"
+            })
