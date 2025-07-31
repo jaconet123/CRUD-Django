@@ -1,6 +1,17 @@
-
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Home</h1>
+<div class="d-flex justify-content-center align-items-center" style="height: 60vh;">
+    <div class="text-center">
+        <h1 class="display-4 mb-3">Welcome to the Task Manager</h1>
+        <p class="lead">Manage your tasks easily and stay organized.</p>
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'tasks' %}" class="btn btn-success btn-lg mt-3">Go to Tasks</a>
+        {% else %}
+            <a href="{% url 'loginx' %}" class="btn btn-primary btn-lg mt-3 me-2">Login</a>
+            <a href="{% url 'signup' %}" class="btn btn-outline-secondary btn-lg mt-3">Sign Up</a>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

@@ -1,12 +1,35 @@
-    
-{% extends 'base.html' %}   
-{% block content %}
-<h1>sign up</h1>
-    {{error}}
-    <form action="/signup/" method="POST">
-    {% csrf_token %}
-    {{form.as_p}}
-    <button>enviar</button>
+{% extends 'base.html' %}
 
-    </form>
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h1 class="mb-4 text-center">Sign Up</h1>
+
+        {% if error %}
+            <div class="alert alert-danger text-center">
+                {{ error }}
+            </div>
+        {% endif %}
+
+        <form action="{% url 'signup' %}" method="POST" class="border p-4 rounded shadow-sm bg-white">
+            {% csrf_token %}
+
+            {% for field in form %}
+                <div class="mb-3 text-center">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-success w-100 mt-3">Sign Up</button>
+        </form>
+
+        <p class="text-center mt-3">
+            Already have an account? <a href="{% url 'loginx' %}">Login here</a>
+        </p>
+    </div>
+</div>
 {% endblock %}

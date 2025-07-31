@@ -1,22 +1,42 @@
 {% extends 'base.html' %}
-{% block content %}
-<h1>tasks</h1>
-<ul>
-    {% for task in tasklist %}
-    <li>
-       <a href="{% url 'taskdetail' task.id %}">
-         {% if task.important%}
-        <strong>{{task.title}}</strong>
-        {% else %}
-        {{task.title}}
-        {% endif %}
-        <h1></h1>
-        <p>{{task.description}}</p>
-        <p>{{task.user.username}}</p>
-        <p>{{task.important}}</p>
-       </a>
-    </li>
 
-    {% endfor %}
-</ul>
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">Your Tasks</h1>
+
+    {% if tasklist %}
+        <div class="list-group">
+            {% for task in tasklist %}
+                <div class="list-group-item {% if task.important %}list-group-item-warning{% endif %}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="me-3" style="flex: 1;">
+                            <a href="{% url 'taskdetail' task.id %}" class="text-decoration-none text-reset">
+                                <h5 class="mb-1">
+                                    {% if task.important %}
+                                        <strong>{{ task.title }}</strong>
+                                    {% else %}
+                                        {{ task.title }}
+                                    {% endif %}
+                                </h5>
+                                <p class="mb-1">{{ task.description }}</p>
+                                <small class="text-muted">
+                                    {{ task.user.username }} · 
+                                    {{ task.completiondate|date:"M j, Y h:i A" }}
+                                </small>
+                            </a>
+                        </div>
+                        <form action="{% url 'completetask' task.id %}" method="POST" class="ms-3">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-success btn-sm">Complete</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center">
+            No tasks found. Why not <a href="{% url 'createtask' %}" class="alert-link">create one</a>?
+        </div>
+    {% endif %}
+</div>
 {% endblock %}

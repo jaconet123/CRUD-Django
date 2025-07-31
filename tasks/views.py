@@ -6,6 +6,7 @@ from django.contrib.auth import login, logout, authenticate
 from .forms import createtaskform
 from .models import Task
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 
@@ -37,18 +38,26 @@ def signup(request):
             'error': 'Passwords do not match'
         })
 
-
+@login_required
 def logoutx(request):
     logout(request)
     return redirect('home')
 
-
+@login_required
 def tasks(request):
     task_list = Task.objects.filter(
         user=request.user, completiondate__isnull=True)
     return render(request, 'tasks.html', {
         'tasklist': task_list
     })
+@login_required    
+def completed_tasks(request):
+    task_list = Task.objects.filter(
+        user=request.user, completiondate__isnull=False).order_by('-completiondate')
+    return render(request, 'tasks.html', {
+        'tasklist': task_list
+    })
+
 
 
 def loginx(request):
@@ -68,7 +77,7 @@ def loginx(request):
             login(request, user)
             return redirect('tasks')
 
-
+@login_required    
 def create_task(request):
 
     if request.method == 'GET':
@@ -90,7 +99,7 @@ def create_task(request):
 
             })
 
-
+@login_required    
 def task_detail(request, task_id):
 
     if request.method == 'GET':
@@ -116,14 +125,15 @@ def task_detail(request, task_id):
                 'error': "error updating task"
             })
 
-
+@login_required    
 def complete_task(request,task_id):
     task_selected = get_object_or_404(Task, pk=task_id, user=request.user)
     if request.method == 'POST':
         task_selected.completiondate= timezone.now()
         task_selected.save()
         return redirect (tasks)
-
+    
+@login_required    
 def delete_task(request,task_id):
     task_selected = get_object_or_404(Task, pk=task_id, user=request.user)
     if request.method == 'POST':
